@@ -8,6 +8,7 @@ from app.db import SessionLocal
 from app.seed import seed_default_agents
 from app.api.agent_api import router as agent_router
 from app.api.agent_log_api import router as agent_log_router
+from app.api.real_agent_api import router as real_agent_router
 
 app = FastAPI(
     title="校园智能体后端",
@@ -39,6 +40,7 @@ app.add_middleware(
 app.include_router(dingdang_router)
 app.include_router(agent_router)
 app.include_router(agent_log_router)
+app.include_router(real_agent_router)
 
 
 @app.get("/")
