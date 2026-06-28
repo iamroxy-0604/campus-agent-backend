@@ -16,6 +16,13 @@ SCHOOL_SCENE = {
             "icon": "/assets/icons/stadium.png",
             "x": 700,
             "y": 360
+        },
+        {
+            "subSceneId": "office",
+            "name": "学院办公楼",
+            "icon": "/assets/icons/office.png",
+            "x": 500,
+            "y": 100
         }
     ]
 }
