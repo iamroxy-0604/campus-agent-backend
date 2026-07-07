@@ -128,11 +128,8 @@ export class CampusScene extends Phaser.Scene {
         this.cameras.main.setBounds(0, 0, 1472, 1088);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
 
-        // 交友弹窗（初始隐藏）
-        this.socialPopup = this.add.container(0, 0);
-        this.socialPopup.setScrollFactor(0);
-        this.socialPopup.setDepth(150);
-        this.socialPopup.setVisible(false);
+        // 交友弹窗元素（不用Container，直接场景对象避免点击失效）
+        this.socialElements = [];
         this._buildSocialPopup();
 
         // 建筑入口（enter 层）—— 只做触发区，不加碰撞体
@@ -266,7 +263,8 @@ export class CampusScene extends Phaser.Scene {
         updateHintPos(this);
 
         // ---- 键盘移动 ----
-        const canMove = !this.isInteracting && !this.socialPopup.visible;
+        const socialVisible = this.socialElements.length > 0 && this.socialElements[0].visible;
+        const canMove = !this.isInteracting && !socialVisible;
         if (canMove) {
             // 玩家一 WASD（优先键盘，否则鼠标点选）
             let p1vx = 0, p1vy = 0;
@@ -276,7 +274,6 @@ export class CampusScene extends Phaser.Scene {
             else if (this.keyS.isDown) p1vy = SPD;
 
             if (p1vx !== 0 || p1vy !== 0) {
-                // 键盘控制时取消鼠标目标
                 this.moveTarget = null;
                 this.player.body.setVelocity(p1vx, p1vy);
             } else if (this.moveTarget) {
@@ -299,14 +296,20 @@ export class CampusScene extends Phaser.Scene {
             if (this.keyUp.isDown) p2vy = -SPD;
             else if (this.keyDown.isDown) p2vy = SPD;
             this.player2.body.setVelocity(p2vx, p2vy);
+        } else {
+            // 弹窗打开时立即归零速度，防止小人滑走
+            this.player.body.setVelocity(0);
+            this.player2.body.setVelocity(0);
+            this.moveTarget = null;
         }
 
         // ---- 双人相遇检测 ----
         if (this.player && this.player2) {
+            const socialVisible = this.socialElements.length > 0 && this.socialElements[0].visible;
             const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.player2.x, this.player2.y);
-            if (dist < 60 && !this.isInteracting && !this.socialPopup.visible && !this._socialLocked) {
+            if (dist < 60 && !this.isInteracting && !socialVisible && !this._socialLocked) {
                 this._showSocialPopup();
-            } else if (dist >= 80 && this.socialPopup.visible && !this._socialLocked) {
+            } else if (dist >= 80 && socialVisible && !this._socialLocked) {
                 this._hideSocialPopup();
             }
         }
@@ -591,73 +594,92 @@ export class CampusScene extends Phaser.Scene {
         return map[sceneKey] || sceneKey;
     }
 
-    // ============ 交友弹窗 ============
+    // ============ 交友弹窗（直接场景对象，不用Container） ============
     _buildSocialPopup() {
-        const W = 1024;
-        // 背景
-        const bg = this.add.rectangle(W / 2, 384, 340, 280, 0x1a1a2e, 0.95);
-        bg.setStrokeStyle(2, 0xffb74d);
-        this.socialPopup.add(bg);
+        this._socialLocked = false;
+        const W = 1024, H = 768;
+        const popupX = W / 2, popupY = H / 2;
+        const pw = 340, ph = 280;
+        const d = 200; // depth
+        const s = 0;   // scrollFactor
 
-        const title = this.add.text(W / 2, 270, '👥 遇见了一位同学！', {
-            fontSize: '20px', fill: '#ffcc00', fontStyle: 'bold'
-        }).setOrigin(0.5);
-        this.socialPopup.add(title);
-
-        const divider = this.add.rectangle(W / 2, 300, 280, 1, 0x444466);
-        this.socialPopup.add(divider);
-
-        // 操作按钮
-        const actions = [
-            { label: '🤝 加好友', y: 335 },
-            { label: '👋 打招呼', y: 385 },
-            { label: '💬 私聊', y: 435 },
-        ];
-
-        actions.forEach(a => {
-            const btnBg = this.add.rectangle(W / 2, a.y, 220, 36, 0x333366, 1);
-            btnBg.setStrokeStyle(1, 0x555588);
-            btnBg.setInteractive({ useHandCursor: true });
-            btnBg.on('pointerover', () => btnBg.setFillStyle(0x444488));
-            btnBg.on('pointerout', () => btnBg.setFillStyle(0x333366));
-            btnBg.on('pointerdown', (p) => {
-                p.event.stopPropagation();
-                showHint(this, `${a.label} — 功能将在后续版本上线`, '#ffcc00');
-            });
-            this.socialPopup.add(btnBg);
-
-            const label = this.add.text(W / 2, a.y, a.label, {
-                fontSize: '16px', fill: '#ffffff'
-            }).setOrigin(0.5);
-            this.socialPopup.add(label);
-        });
-
-        // 关闭按钮
-        const closeBg = this.add.rectangle(W / 2, 485, 120, 28, 0x662222, 1);
-        closeBg.setInteractive({ useHandCursor: true });
-        closeBg.on('pointerover', () => closeBg.setFillStyle(0x883333));
-        closeBg.on('pointerout', () => closeBg.setFillStyle(0x662222));
-        closeBg.on('pointerdown', (p) => {
+        // 背景遮罩（点击关闭区域外）
+        const mask = this.add.rectangle(popupX, popupY, W, H, 0x000000, 0.3);
+        mask.setScrollFactor(s).setDepth(d).setVisible(false).setInteractive();
+        mask.on('pointerdown', (p) => {
             p.event.stopPropagation();
             this._socialLocked = true;
             this._hideSocialPopup();
             this.time.delayedCall(3000, () => { this._socialLocked = false; });
         });
-        this.socialPopup.add(closeBg);
 
-        const closeTxt = this.add.text(W / 2, 485, '✕ 走开', {
+        // 弹窗背景
+        const bg = this.add.rectangle(popupX, popupY, pw, ph, 0x1a1a2e, 0.97);
+        bg.setStrokeStyle(2, 0xffb74d);
+        bg.setScrollFactor(s).setDepth(d + 1).setVisible(false);
+        bg.setInteractive(); // 阻止点击穿透
+
+        // 标题
+        const title = this.add.text(popupX, popupY - 100, '👥 遇见了一位同学！', {
+            fontSize: '20px', fill: '#ffcc00', fontStyle: 'bold'
+        }).setOrigin(0.5).setScrollFactor(s).setDepth(d + 2).setVisible(false);
+
+        const divider = this.add.rectangle(popupX, popupY - 70, 280, 1, 0x444466);
+        divider.setScrollFactor(s).setDepth(d + 2).setVisible(false);
+
+        // 按钮组
+        const btnEls = [];
+        const actions = [
+            { label: '🤝 加好友', y: popupY - 35 },
+            { label: '👋 打招呼', y: popupY + 15 },
+            { label: '💬 私聊', y: popupY + 65 },
+        ];
+        actions.forEach(a => {
+            const btn = this.add.rectangle(popupX, a.y, 220, 36, 0x333366, 1);
+            btn.setStrokeStyle(1, 0x555588);
+            btn.setScrollFactor(s).setDepth(d + 2).setVisible(false);
+            btn.setInteractive({ useHandCursor: true });
+            btn.on('pointerover', () => btn.setFillStyle(0x444488));
+            btn.on('pointerout', () => btn.setFillStyle(0x333366));
+            btn.on('pointerdown', (p2) => {
+                p2.event.stopPropagation();
+                showHint(this, `${a.label} — 功能将在后续版本上线`, '#ffcc00');
+            });
+            btnEls.push(btn);
+
+            const lbl = this.add.text(popupX, a.y, a.label, {
+                fontSize: '16px', fill: '#ffffff'
+            }).setOrigin(0.5).setScrollFactor(s).setDepth(d + 3).setVisible(false);
+            btnEls.push(lbl);
+        });
+
+        // 关闭按钮
+        const closeBg = this.add.rectangle(popupX, popupY + 115, 120, 28, 0x662222, 1);
+        closeBg.setStrokeStyle(1, 0x883333);
+        closeBg.setScrollFactor(s).setDepth(d + 2).setVisible(false);
+        closeBg.setInteractive({ useHandCursor: true });
+        closeBg.on('pointerover', () => closeBg.setFillStyle(0x883333));
+        closeBg.on('pointerout', () => closeBg.setFillStyle(0x662222));
+        closeBg.on('pointerdown', (p3) => {
+            p3.event.stopPropagation();
+            this._socialLocked = true;
+            this._hideSocialPopup();
+            this.time.delayedCall(3000, () => { this._socialLocked = false; });
+        });
+
+        const closeTxt = this.add.text(popupX, popupY + 115, '✕ 走开', {
             fontSize: '14px', fill: '#ff9999'
-        }).setOrigin(0.5);
-        this.socialPopup.add(closeTxt);
-        this._socialLocked = false;
+        }).setOrigin(0.5).setScrollFactor(s).setDepth(d + 3).setVisible(false);
+
+        // 所有元素统一管理
+        this.socialElements = [mask, bg, title, divider, ...btnEls, closeBg, closeTxt];
     }
 
     _showSocialPopup() {
-        this.socialPopup.setVisible(true);
-        // 不锁 isInteracting，只靠 canMove 阻止移动，弹窗按钮正常可点
+        this.socialElements.forEach(el => el.setVisible(true));
     }
 
     _hideSocialPopup() {
-        this.socialPopup.setVisible(false);
+        this.socialElements.forEach(el => el.setVisible(false));
     }
 }
