@@ -303,7 +303,7 @@ export class CampusScene extends Phaser.Scene {
         // ---- 双人相遇检测 ----
         if (this.player && this.player2) {
             const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.player2.x, this.player2.y);
-            if (dist < 60 && !this.isInteracting && !this.socialPopup.visible) {
+            if (dist < 60 && !this.isInteracting && !this.socialPopup.visible && !this._socialLocked) {
                 this._showSocialPopup();
             } else if (dist >= 80 && this.socialPopup.visible && !this._socialLocked) {
                 this._hideSocialPopup();
@@ -640,7 +640,7 @@ export class CampusScene extends Phaser.Scene {
             p.event.stopPropagation();
             this._socialLocked = true;
             this._hideSocialPopup();
-            this.time.delayedCall(2000, () => { this._socialLocked = false; });
+            this.time.delayedCall(3000, () => { this._socialLocked = false; });
         });
         this.socialPopup.add(closeBg);
 
