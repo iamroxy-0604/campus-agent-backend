@@ -160,6 +160,7 @@ export class CampusScene extends Phaser.Scene {
             { id: 'dorm', name: '宿舍', x: 516, y: 423, scene: 'DormScene' },
             { id: 'service_hall', name: '事务大厅', x: 923, y: 633, scene: 'ServiceHallScene' },
             { id: 'research', name: '科研楼', x: 1138, y: 363, scene: 'ResearchScene' },
+            { id: 'teacher_office', name: '教师办公室', x: 219, y: 655, scene: 'TeacherOfficeScene' },
         ];
 
         newBuildings.forEach(b => {
@@ -167,9 +168,6 @@ export class CampusScene extends Phaser.Scene {
             this.physics.add.existing(zone, true);
             zone.body.immovable = true;
             zone.visible = false;
-            // 入口标记点（半透明小圆）
-            const marker = this.add.circle(b.x, b.y, 15, 0xffcc00, 0.5);
-            marker.setDepth(4);
             this.enterZones.push({
                 target: b.id,
                 prompt: b.name,
@@ -310,6 +308,9 @@ export class CampusScene extends Phaser.Scene {
                 } else if (target === 'research') {
                     this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
                     this.scene.start('ResearchScene');
+                } else if (target === 'teacher_office') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('TeacherOfficeScene');
                 }
             }
         }
@@ -351,6 +352,7 @@ export class CampusScene extends Phaser.Scene {
             { label: '宿舍', scene: 'DormScene' },
             { label: '机房', scene: 'ComputerLabScene' },
             { label: '科研楼', scene: 'ResearchScene' },
+            { label: '教师办公室', scene: 'TeacherOfficeScene' },
         ];
 
         const buttons = [];
@@ -523,7 +525,7 @@ export class CampusScene extends Phaser.Scene {
     }
 
     getSceneLabel(sceneKey) {
-        const map = { GymScene: '体育馆', McDonaldScene: '麦当劳', OfficeScene: '院长办公室', ServiceHallScene: '事务大厅', LibraryScene: '图书馆', DormScene: '宿舍', ComputerLabScene: '机房', ResearchScene: '科研楼' };
+        const map = { GymScene: '体育馆', McDonaldScene: '麦当劳', OfficeScene: '院长办公室', ServiceHallScene: '事务大厅', LibraryScene: '图书馆', DormScene: '宿舍', ComputerLabScene: '机房', ResearchScene: '科研楼', TeacherOfficeScene: '教师办公室' };
         return map[sceneKey] || sceneKey;
     }
 }

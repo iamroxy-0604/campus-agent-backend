@@ -10,6 +10,7 @@ import { LibraryScene } from './scenes/LibraryScene.js';
 import { DormScene } from './scenes/DormScene.js';
 import { ComputerLabScene } from './scenes/ComputerLabScene.js';
 import { ResearchScene } from './scenes/ResearchScene.js';
+import { TeacherOfficeScene } from './scenes/TeacherOfficeScene.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -36,6 +37,7 @@ const config = {
         DormScene,
         ComputerLabScene,
         ResearchScene,
+        TeacherOfficeScene,
     ]
 };
 
