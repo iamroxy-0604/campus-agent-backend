@@ -314,10 +314,11 @@ export class CampusScene extends Phaser.Scene {
             }
         }
 
-        // 检测进入区域（玩家一）
+        // 检测进入区域（玩家一 + 玩家二）
         let closestEnter = null;
         for (let zone of this.enterZones) {
-            if (this.physics.overlap(this.player, zone.zone)) {
+            if (this.physics.overlap(this.player, zone.zone) ||
+                this.physics.overlap(this.player2, zone.zone)) {
                 closestEnter = zone;
                 break;
             }
