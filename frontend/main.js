@@ -4,6 +4,12 @@ import { CampusScene } from './scenes/CampusScene.js';
 import { GymScene } from './scenes/GymScene.js';
 import { McDonaldScene } from './scenes/McDonaldScene.js';
 import { OfficeScene } from './scenes/OfficeScene.js';
+import { BulletinScene } from './scenes/BulletinScene.js';
+import { ServiceHallScene } from './scenes/ServiceHallScene.js';
+import { LibraryScene } from './scenes/LibraryScene.js';
+import { DormScene } from './scenes/DormScene.js';
+import { ComputerLabScene } from './scenes/ComputerLabScene.js';
+import { ResearchScene } from './scenes/ResearchScene.js';
 
 const config = {
     type: Phaser.AUTO,
@@ -19,7 +25,18 @@ const config = {
         width: 1024,
         height: 768
     },
-    scene: [CampusScene, GymScene, McDonaldScene, OfficeScene]
+    scene: [
+        CampusScene,
+        GymScene,
+        McDonaldScene,
+        OfficeScene,
+        BulletinScene,
+        ServiceHallScene,
+        LibraryScene,
+        DormScene,
+        ComputerLabScene,
+        ResearchScene,
+    ]
 };
 
 new Phaser.Game(config);

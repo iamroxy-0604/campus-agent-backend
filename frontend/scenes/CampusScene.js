@@ -2,6 +2,7 @@
 import * as Phaser from 'phaser';
 import { getProperty, showHint, updateHintPos, clearActiveHint } from '../utils/helpers.js';
 import { sendDingdangMessage } from '../services/dingdangService.js';
+import { SidebarUI } from '../utils/SidebarUI.js';
 
 export class CampusScene extends Phaser.Scene {
     constructor() {
@@ -30,6 +31,15 @@ export class CampusScene extends Phaser.Scene {
     this.load.image('bg_gym', '/sucai/zi_gym.png');
     this.load.image('bg_mc', '/sucai/zi_mc.png');
     this.load.image('bg_office', '/sucai/zi_offical.png');
+    this.load.image('board', '/sucai/board.png');
+    // 新场景背景图
+    this.load.image('bg_gym_new', '/sucai/zi_gym_new.png');
+    this.load.image('bg_office_new', '/sucai/zi_office_new.png');
+    this.load.image('bg_service', '/sucai/zi_service.png');
+    this.load.image('bg_library', '/sucai/zi_library.png');
+    this.load.image('bg_dorm', '/sucai/zi_dorm.png');
+    this.load.image('bg_computerlab', '/sucai/zi_computerlab.png');
+    this.load.image('bg_research', '/sucai/zi_research.png');
 }
     create(data) {
         let startX = 632, startY = 156;
@@ -127,6 +137,58 @@ export class CampusScene extends Phaser.Scene {
             });
         }
 
+        // 公告栏实体
+        const boardX = 400, boardY = 200;
+        const boardSprite = this.add.sprite(boardX, boardY, 'board');
+        boardSprite.setDisplaySize(48, 48);
+        boardSprite.setDepth(5);
+        const boardZone = this.add.rectangle(boardX, boardY, 80, 80);
+        this.physics.add.existing(boardZone, true);
+        boardZone.body.immovable = true;
+        boardZone.visible = false;
+        this.enterZones.push({
+            target: 'bulletin',
+            prompt: '校园公告栏',
+            zone: boardZone,
+            x: boardX, y: boardY, width: 80, height: 80
+        });
+
+        // ---- 新建筑入口区域（按命名匹配校园地图位置）----
+        const newBuildings = [
+            { id: 'service_hall', name: '事务大厅', x: 180, y: 350, scene: 'ServiceHallScene' },
+            { id: 'library', name: '图书馆', x: 620, y: 520, scene: 'LibraryScene' },
+            { id: 'dorm', name: '宿舍', x: 1180, y: 220, scene: 'DormScene' },
+            { id: 'computer_lab', name: '机房', x: 1080, y: 720, scene: 'ComputerLabScene' },
+            { id: 'research', name: '科研楼', x: 280, y: 780, scene: 'ResearchScene' },
+        ];
+
+        newBuildings.forEach(b => {
+            const zone = this.add.rectangle(b.x, b.y, 90, 90);
+            this.physics.add.existing(zone, true);
+            zone.body.immovable = true;
+            zone.visible = false;
+            // 入口标记点（半透明小圆）
+            const marker = this.add.circle(b.x, b.y, 15, 0xffcc00, 0.5);
+            marker.setDepth(4);
+            this.enterZones.push({
+                target: b.id,
+                prompt: b.name,
+                zone: zone,
+                x: b.x, y: b.y, width: 90, height: 90,
+                scene: b.scene
+            });
+        });
+
+        // ---- 侧边栏 ----
+        this.sidebar = new SidebarUI(this);
+        this.sidebar.create();
+
+        const sidebarHint = this.add.text(68, 200, '◀', {
+            fontSize: '14px', fill: '#888888'
+        }).setScrollFactor(0).setDepth(52);
+        const sidebarHint2 = this.add.text(68, 388, '侧', { fontSize: '11px', fill: '#888888' }).setScrollFactor(0).setDepth(52);
+        const sidebarHint3 = this.add.text(68, 400, '栏', { fontSize: '11px', fill: '#888888' }).setScrollFactor(0).setDepth(52);
+
         this.input.on('pointerdown', (pointer) => {
             if (this.isInteracting) return;
             const worldPos = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
@@ -219,6 +281,24 @@ export class CampusScene extends Phaser.Scene {
                 } else if (target === 'office') {
                     this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
                     this.scene.start('OfficeScene');
+                } else if (target === 'bulletin') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('BulletinScene');
+                } else if (target === 'service_hall') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('ServiceHallScene');
+                } else if (target === 'library') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('LibraryScene');
+                } else if (target === 'dorm') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('DormScene');
+                } else if (target === 'computer_lab') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('ComputerLabScene');
+                } else if (target === 'research') {
+                    this.registry.set('returnPos', { x: this.player.x, y: this.player.y });
+                    this.scene.start('ResearchScene');
                 }
             }
         }
@@ -254,7 +334,12 @@ export class CampusScene extends Phaser.Scene {
         const destinations = [
             { label: '体育馆', scene: 'GymScene' },
             { label: '麦当劳餐厅', scene: 'McDonaldScene' },
-            { label: '院长办公室', scene: 'OfficeScene' }
+            { label: '院长办公室', scene: 'OfficeScene' },
+            { label: '事务大厅', scene: 'ServiceHallScene' },
+            { label: '图书馆', scene: 'LibraryScene' },
+            { label: '宿舍', scene: 'DormScene' },
+            { label: '机房', scene: 'ComputerLabScene' },
+            { label: '科研楼', scene: 'ResearchScene' },
         ];
 
         const buttons = [];
@@ -427,7 +512,7 @@ export class CampusScene extends Phaser.Scene {
     }
 
     getSceneLabel(sceneKey) {
-        const map = { GymScene: '体育馆', McDonaldScene: '麦当劳', OfficeScene: '院长办公室' };
+        const map = { GymScene: '体育馆', McDonaldScene: '麦当劳', OfficeScene: '院长办公室', ServiceHallScene: '事务大厅', LibraryScene: '图书馆', DormScene: '宿舍', ComputerLabScene: '机房', ResearchScene: '科研楼' };
         return map[sceneKey] || sceneKey;
     }
 }
