@@ -290,25 +290,31 @@ export class SidebarUI {
     // ============ 二手市场列表 ============
     _buildMarket(ctn, cx, iw) {
         let y = 0;
+        const maxTitleW = iw - 120;  // 标题最大宽度，防止溢出
         MARKET_DATA.forEach(item => {
-            const ch = 58, cy2 = y + ch / 2;
+            const ch = 70, cy2 = y + ch / 2;
             const card = this.scene.add.rectangle(cx, cy2, iw, ch, 0x5c3a1e, 0.85).setStrokeStyle(1, 0x7a5a30);
             ctn.add(card);
 
-            ctn.add(this.scene.add.text(cx - iw / 2 + 10, cy2 - 15, `[${item.tag}]`,
+            // 标签
+            ctn.add(this.scene.add.text(cx - iw / 2 + 10, cy2 - 20, `[${item.tag}]`,
                 { fontSize: '11px', fill: '#81c784' }));
-            const t = item.title.length > 12 ? item.title.slice(0, 12) + '…' : item.title;
-            ctn.add(this.scene.add.text(cx - iw / 2 + 55, cy2 - 15, t,
-                { fontSize: '14px', fill: '#f0e6d3', fontStyle: 'bold' }));
+            // 标题（限制宽度自动换行）
+            ctn.add(this.scene.add.text(cx - iw / 2 + 55, cy2 - 20, item.title,
+                { fontSize: '13px', fill: '#f0e6d3', fontStyle: 'bold',
+                  wordWrap: { width: maxTitleW } }));
 
-            ctn.add(this.scene.add.text(cx - iw / 2 + 10, cy2 + 10, item.price,
+            // 价格
+            ctn.add(this.scene.add.text(cx - iw / 2 + 10, cy2 + 12, item.price,
                 { fontSize: '16px', fill: '#ef5350', fontStyle: 'bold' }));
-            ctn.add(this.scene.add.text(cx - iw / 2 + 65, cy2 + 12,
+            // 卖家信息
+            ctn.add(this.scene.add.text(cx - iw / 2 + 70, cy2 + 14,
                 `${item.seller} · ${item.cond}`, { fontSize: '11px', fill: '#a09080' }));
-            ctn.add(this.scene.add.text(cx + iw / 2 - 35, cy2, '💬',
-                { fontSize: '18px' }).setOrigin(0.5).setInteractive({ useHandCursor: true }));
+            // 联系按钮
+            ctn.add(this.scene.add.text(cx + iw / 2 - 30, cy2, '💬',
+                { fontSize: '20px' }).setOrigin(0.5).setInteractive({ useHandCursor: true }));
 
-            y += ch + 6;
+            y += ch + 8;
         });
         return y;
     }
