@@ -266,7 +266,8 @@ export class CampusScene extends Phaser.Scene {
         updateHintPos(this);
 
         // ---- 键盘移动 ----
-        if (!this.isInteracting) {
+        const canMove = !this.isInteracting && !this.socialPopup.visible;
+        if (canMove) {
             // 玩家一 WASD（优先键盘，否则鼠标点选）
             let p1vx = 0, p1vy = 0;
             if (this.keyA.isDown) p1vx = -SPD;
@@ -653,11 +654,10 @@ export class CampusScene extends Phaser.Scene {
 
     _showSocialPopup() {
         this.socialPopup.setVisible(true);
-        this.isInteracting = true;
+        // 不锁 isInteracting，只靠 canMove 阻止移动，弹窗按钮正常可点
     }
 
     _hideSocialPopup() {
         this.socialPopup.setVisible(false);
-        this.isInteracting = false;
     }
 }
