@@ -1,12 +1,12 @@
 // utils/SidebarUI.js
-// 星露谷风格侧边栏 —— 公告栏 + 二手市场 + 好友
+// 星露谷风格侧边栏 —— 用 Container 统一管理，关闭即销毁，杜绝残留
 import * as Phaser from 'phaser';
 
-const SLOT_COLOR = 0x5c3a1e;      // 木框深棕
-const SLOT_BORDER = 0x8b6914;     // 金边
-const SLOT_SELECTED = 0xd4a017;   // 选中高亮金
-const PANEL_BG = 0x3d2817;        // 面板深木色
-const PANEL_BORDER = 0xc49a2a;    // 面板金框
+const SLOT_COLOR = 0x5c3a1e;
+const SLOT_BORDER = 0x8b6914;
+const SLOT_SELECTED = 0xd4a017;
+const PANEL_BG = 0x3d2817;
+const PANEL_BORDER = 0xc49a2a;
 
 const TABS = [
     { id: 'bulletin', icon: '📋', label: '公告栏', color: '#ffcc00' },
@@ -15,21 +15,21 @@ const TABS = [
 ];
 
 const BULLETIN_DATA = [
-    { title: '校园网络维护通知', date: '07-08', type: '系统通知', color: '#4fc3f7', content: '校园WiFi将于7月10日凌晨2:00-6:00进行升级维护，届时网络暂停服务，请提前安排。' },
-    { title: '二手交易平台即将上线', date: '07-07', type: '平台公告', color: '#81c784', content: '校园智能体即将推出二手交易功能！同学们可以发布闲置物品、浏览商品、在线沟通。' },
-    { title: '暑期体育馆开放调整', date: '07-06', type: '场馆通知', color: '#ffb74d', content: '暑假期间体育馆开放时间调整为14:00-20:00，游泳池暂停使用。' },
-    { title: '校园卡充值优惠活动', date: '07-05', type: '优惠活动', color: '#ef5350', content: '即日起校园卡在麦当劳消费满30元立减5元，体育馆预约8折！' },
-    { title: '歌手大赛开始报名', date: '07-04', type: '活动通知', color: '#ce93d8', content: '校园歌手大赛初赛7月20日，决赛7月28日。一等奖蓝牙耳机！' },
-    { title: '图书馆暑期借阅变更', date: '07-03', type: '系统通知', color: '#4fc3f7', content: '暑假借阅期限由30天延长至60天，已借图书自动延期。' },
+    { title: '校园网络维护通知', date: '07-08', type: '系统通知', color: '#4fc3f7', detail: '校园WiFi将于7月10日凌晨2:00-6:00进行升级维护，届时网络暂停服务，请提前安排。' },
+    { title: '二手交易平台即将上线', date: '07-07', type: '平台公告', color: '#81c784', detail: '校园智能体即将推出二手交易功能！同学们可以发布闲置物品、浏览商品、在线沟通。' },
+    { title: '暑期体育馆开放调整', date: '07-06', type: '场馆通知', color: '#ffb74d', detail: '暑假期间体育馆开放时间调整为14:00-20:00，游泳池暂停使用。' },
+    { title: '校园卡充值优惠活动', date: '07-05', type: '优惠活动', color: '#ef5350', detail: '即日起校园卡在麦当劳消费满30元立减5元，体育馆预约8折！' },
+    { title: '歌手大赛开始报名', date: '07-04', type: '活动通知', color: '#ce93d8', detail: '校园歌手大赛初赛7月20日，决赛7月28日。一等奖蓝牙耳机！' },
+    { title: '图书馆暑期借阅变更', date: '07-03', type: '系统通知', color: '#4fc3f7', detail: '暑假借阅期限由30天延长至60天，已借图书自动延期。' },
 ];
 
 const MARKET_DATA = [
-    { id: 1, title: '高等数学（第七版）上册', price: '¥15', seller: '大二学长', condition: '九成新', tag: '教材' },
-    { id: 2, title: 'MacBook Pro 2023 14寸', price: '¥8,500', seller: '毕业生小王', condition: '95新', tag: '数码' },
-    { id: 3, title: '机械键盘 IKBC C87', price: '¥120', seller: '电竞社成员', condition: '八成新', tag: '外设' },
-    { id: 4, title: '床上书桌 折叠款', price: '¥35', seller: '6号楼学姐', condition: '七成新', tag: '生活' },
-    { id: 5, title: '二手自行车 山地车', price: '¥280', seller: '研二老李', condition: '六成新', tag: '出行' },
-    { id: 6, title: '考研英语真题 2025版', price: '¥25', seller: '考研上岸学姐', condition: '少量笔记', tag: '考研' },
+    { id: 1, title: '高等数学（第七版）', price: '¥15', seller: '大二学长', cond: '九成新', tag: '教材' },
+    { id: 2, title: 'MacBook Pro 14寸', price: '¥8,500', seller: '毕业生小王', cond: '95新', tag: '数码' },
+    { id: 3, title: '机械键盘 IKBC C87', price: '¥120', seller: '电竞社', cond: '八成新', tag: '外设' },
+    { id: 4, title: '床上书桌 折叠款', price: '¥35', seller: '6号楼学姐', cond: '七成新', tag: '生活' },
+    { id: 5, title: '二手山地自行车', price: '¥280', seller: '研二老李', cond: '六成新', tag: '出行' },
+    { id: 6, title: '考研英语真题2025', price: '¥25', seller: '考研上岸学姐', cond: '少量笔记', tag: '考研' },
 ];
 
 const FRIENDS_DATA = [
@@ -44,415 +44,305 @@ export class SidebarUI {
     constructor(scene) {
         this.scene = scene;
         this.activeTab = null;
-        this.panelElements = [];
-        this.slotElements = [];
+        this.slots = [];             // 侧边栏槽位元素
+        this.panelContainer = null;  // 面板容器（关闭时整个销毁）
+        this.wheelFn = null;         // 滚轮回调
     }
 
+    // ============ 创建侧边栏 ============
     create() {
-        const SLOT_SIZE = 56;
-        const GAP = 8;
-        const START_Y = 180;
-
+        const SIZE = 56, GAP = 8, START_Y = 180;
         TABS.forEach((tab, i) => {
-            const x = 34;
-            const y = START_Y + i * (SLOT_SIZE + GAP);
+            const x = 34, y = START_Y + i * (SIZE + GAP);
 
-            // 槽位背景（星露谷风格木框）
-            const slotBg = this.scene.add.rectangle(x, y, SLOT_SIZE, SLOT_SIZE, SLOT_COLOR, 1);
-            slotBg.setStrokeStyle(2, SLOT_BORDER);
-            slotBg.setScrollFactor(0);
-            slotBg.setDepth(60);
+            const bg = this.scene.add.rectangle(x, y, SIZE, SIZE, SLOT_COLOR)
+                .setStrokeStyle(2, SLOT_BORDER)
+                .setScrollFactor(0).setDepth(60);
 
-            // 图标
-            const icon = this.scene.add.text(x, y - 6, tab.icon, {
-                fontSize: '22px'
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(61);
+            const icon = this.scene.add.text(x, y - 6, tab.icon, { fontSize: '22px' })
+                .setOrigin(0.5).setScrollFactor(0).setDepth(61);
 
-            // 标签
-            const label = this.scene.add.text(x, y + 20, tab.label, {
-                fontSize: '10px', fill: '#d4c5a0'
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(61);
+            const label = this.scene.add.text(x, y + 20, tab.label,
+                { fontSize: '10px', fill: '#d4c5a0' })
+                .setOrigin(0.5).setScrollFactor(0).setDepth(61);
 
-            // 交互区域（扩大点击范围）
-            const hitArea = this.scene.add.rectangle(x, y, SLOT_SIZE, SLOT_SIZE, 0x000000, 0);
-            hitArea.setScrollFactor(0);
-            hitArea.setDepth(62);
-            hitArea.setInteractive({ useHandCursor: true });
+            const hit = this.scene.add.rectangle(x, y, SIZE, SIZE, 0x000000, 0)
+                .setScrollFactor(0).setDepth(62).setInteractive({ useHandCursor: true });
 
-            hitArea.on('pointerover', () => {
-                if (this.activeTab !== tab.id) {
-                    slotBg.setFillStyle(0x7a4e22);
-                    label.setColor('#ffffff');
-                }
+            hit.on('pointerover', () => {
+                if (this.activeTab !== tab.id) { bg.setFillStyle(0x7a4e22); label.setColor('#fff'); }
             });
-            hitArea.on('pointerout', () => {
-                if (this.activeTab !== tab.id) {
-                    slotBg.setFillStyle(SLOT_COLOR);
-                    label.setColor('#d4c5a0');
-                }
+            hit.on('pointerout', () => {
+                if (this.activeTab !== tab.id) { bg.setFillStyle(SLOT_COLOR); label.setColor('#d4c5a0'); }
             });
-            hitArea.on('pointerdown', (pointer) => {
-                pointer.event.stopPropagation();
-                this.togglePanel(tab);
-            });
+            hit.on('pointerdown', (p) => { p.event.stopPropagation(); this.toggle(tab); });
 
-            this.slotElements.push({
-                id: tab.id, slotBg, icon, label, hitArea, tab,
-                x, y, size: SLOT_SIZE
-            });
+            this.slots.push({ id: tab.id, bg, icon, label, hit, tab, x, y });
         });
 
-        // 关闭按钮（初始隐藏）
-        this.closeIcon = this.scene.add.text(980, 35, '✕', {
-            fontSize: '32px', fill: '#ff6666', fontStyle: 'bold',
-            stroke: '#000000', strokeThickness: 3
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(100).setInteractive({ useHandCursor: true });
-        this.closeIcon.setVisible(false);
-        this.closeIcon.on('pointerdown', (pointer) => {
-            pointer.event.stopPropagation();
-            this.closePanel();
-        });
+        // 遮罩（点击关闭）
+        this.overlay = this.scene.add.rectangle(512, 384, 1024, 768, 0x000000, 0)
+            .setScrollFactor(0).setDepth(64).setInteractive().setVisible(false);
+        this.overlay.on('pointerdown', (p) => { p.event.stopPropagation(); this.close(); });
 
-        // 半透明遮罩层（面板打开时）
-        this.overlay = this.scene.add.rectangle(512, 384, 1024, 768, 0x000000, 0);
-        this.overlay.setScrollFactor(0);
-        this.overlay.setDepth(64);
-        this.overlay.setInteractive();
-        this.overlay.setVisible(false);
-        this.overlay.on('pointerdown', (pointer) => {
-            pointer.event.stopPropagation();
-            this.closePanel();
-        });
+        // 全局关闭按钮
+        this.closeBtn = this.scene.add.text(980, 35, '✕',
+            { fontSize: '32px', fill: '#f66', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 })
+            .setOrigin(0.5).setScrollFactor(0).setDepth(100).setInteractive({ useHandCursor: true }).setVisible(false);
+        this.closeBtn.on('pointerdown', (p) => { p.event.stopPropagation(); this.close(); });
     }
 
-    togglePanel(tab) {
-        if (this.activeTab === tab.id) {
-            this.closePanel();
-        } else {
-            this.openPanel(tab);
-        }
+    // ============ 切换面板 ============
+    toggle(tab) {
+        if (this.activeTab === tab.id) { this.close(); return; }
+        this.open(tab);
     }
 
-    openPanel(tab) {
-        this.closePanel(true);
+    open(tab) {
+        this.close();  // 先清干净
         this.activeTab = tab.id;
 
-        // 高亮选中槽
-        this.slotElements.forEach(s => {
+        // 高亮槽位
+        this.slots.forEach(s => {
             if (s.id === tab.id) {
-                s.slotBg.setFillStyle(0x8b6914);
-                s.slotBg.setStrokeStyle(3, SLOT_SELECTED);
-                s.label.setColor('#ffffff');
+                s.bg.setFillStyle(0x8b6914).setStrokeStyle(3, SLOT_SELECTED);
+                s.label.setColor('#fff');
             } else {
-                s.slotBg.setFillStyle(SLOT_COLOR);
-                s.slotBg.setStrokeStyle(2, SLOT_BORDER);
+                s.bg.setFillStyle(SLOT_COLOR).setStrokeStyle(2, SLOT_BORDER);
                 s.label.setColor('#d4c5a0');
             }
         });
 
-        // 阻止玩家移动
         this.scene.isInteracting = true;
+        this.overlay.setVisible(true).setFillStyle(0x000000, 0.35);
+        this.closeBtn.setVisible(true).setDepth(100);
 
-        // 显示遮罩
-        this.overlay.setVisible(true);
-        this.overlay.setFillStyle(0x000000, 0.35);
+        // 面板容器 —— 所有面板内容放里面，关闭时整个销毁
+        this.panelContainer = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(65);
 
         const W = 1024, H = 768;
-        const panelW = 480, panelH = 530;
-        const panelX = W / 2 + 20, panelY = H / 2;
+        const pw = 460, ph = 500;
+        const cx = W / 2 + 20, cy = H / 2;
 
-        // 面板背景（星露谷风格）
-        const panelBg = this.scene.add.rectangle(panelX, panelY, panelW, panelH, PANEL_BG, 0.97);
-        panelBg.setStrokeStyle(3, PANEL_BORDER);
-        panelBg.setScrollFactor(0);
-        panelBg.setDepth(65);
+        // 面板背景
+        const panelBg = this.scene.add.rectangle(cx, cy, pw, ph, PANEL_BG, 0.97)
+            .setStrokeStyle(3, PANEL_BORDER);
+        this.panelContainer.add(panelBg);
 
-        // 标题栏
-        const titleBg = this.scene.add.rectangle(panelX, panelY - panelH / 2 + 28, panelW - 6, 50, 0x2a1a0a, 1);
-        titleBg.setScrollFactor(0);
-        titleBg.setDepth(66);
-
-        const titleText = this.scene.add.text(panelX - panelW / 2 + 25, panelY - panelH / 2 + 18,
-            `${tab.icon}  ${tab.label}`, {
-                fontSize: '22px', fill: '#ffcc00', fontStyle: 'bold'
-            }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(67);
+        // 标题
+        const titleY = cy - ph / 2 + 30;
+        const titleBg = this.scene.add.rectangle(cx, titleY, pw - 6, 46, 0x2a1a0a);
+        const titleTxt = this.scene.add.text(cx - pw / 2 + 20, titleY, `${tab.icon}  ${tab.label}`,
+            { fontSize: '22px', fill: '#ffcc00', fontStyle: 'bold' }).setOrigin(0, 0.5);
+        this.panelContainer.add([titleBg, titleTxt]);
 
         // 分隔线
-        const divider = this.scene.add.rectangle(panelX, panelY - panelH / 2 + 58, panelW - 20, 2, PANEL_BORDER);
-        divider.setScrollFactor(0);
-        divider.setDepth(67);
+        const divY = titleY + 28;
+        this.panelContainer.add(this.scene.add.rectangle(cx, divY, pw - 20, 2, PANEL_BORDER));
 
-        this.panelElements = [panelBg, titleBg, titleText, divider];
+        // 内容区（可滚动容器）
+        const listTop = divY + 18;
+        const listH = ph - 90;
+        const innerW = pw - 36;
 
-        // 内容区
-        const contentTop = panelY - panelH / 2 + 80;
-        const contentH = panelH - 105;
+        // 裁剪遮罩
+        const maskGfx = this.scene.make.graphics();
+        maskGfx.fillRect(cx - pw / 2 + 10, listTop, pw - 20, listH);
+        const mask = maskGfx.createGeometryMask();
 
-        if (tab.id === 'bulletin') {
-            this.buildList(contentTop, contentH, panelX, panelW, BULLETIN_DATA, 'bulletin', tab);
-        } else if (tab.id === 'market') {
-            this.buildMarketList(contentTop, contentH, panelX, panelW, tab);
-        } else if (tab.id === 'friends') {
-            this.buildFriendsList(contentTop, contentH, panelX, panelW, tab);
+        const listCtn = this.scene.add.container(0, 0).setMask(mask);
+        this.panelContainer.add(listCtn);
+
+        // 保存引用以便滚动
+        this._listCtn = listCtn;
+        this._listTop = listTop;
+        this._listH = listH;
+        this._maskGfx = maskGfx;
+        this._cx = cx;
+        this._pw = pw;  // 保存 pw 供详情页使用
+        this._tab = tab; // 保存 tab 供详情页返回
+
+        // 渲染内容
+        let totalH = 0;
+        if (tab.id === 'bulletin') totalH = this._buildBulletin(listCtn, cx, innerW);
+        else if (tab.id === 'market') totalH = this._buildMarket(listCtn, cx, innerW);
+        else if (tab.id === 'friends') this._buildFriends(listCtn, cx, innerW, listTop, listH);
+
+        // 滚轮
+        if (totalH > listH) {
+            let sy = 0;
+            this.wheelFn = (pointer, go, dx, dy) => {
+                if (this.activeTab !== tab.id) return;
+                sy += dy * 0.3;
+                sy = Phaser.Math.Clamp(sy, 0, totalH - listH + 10);
+                listCtn.y = listTop - sy;
+            };
+            this.scene.input.on('wheel', this.wheelFn);
         }
-
-        this.closeIcon.setVisible(true);
-        this.closeIcon.setDepth(100);
     }
 
-    closePanel(silent = false) {
-        this.panelElements.forEach(el => el.destroy());
-        this.panelElements = [];
-        // 恢复玩家移动
+    close() {
+        // 销毁面板容器（包含所有子元素）
+        if (this.panelContainer) {
+            this.panelContainer.destroy();
+            this.panelContainer = null;
+        }
+        // 清理滚轮监听
+        if (this.wheelFn) {
+            this.scene.input.off('wheel', this.wheelFn);
+            this.wheelFn = null;
+        }
+        this._listCtn = null;
+        this._maskGfx = null;
+        this._tab = null;
+
         this.scene.isInteracting = false;
         this.activeTab = null;
         this.overlay.setVisible(false);
-        this.closeIcon.setVisible(false);
+        this.closeBtn.setVisible(false);
 
-        this.slotElements.forEach(s => {
-            s.slotBg.setFillStyle(SLOT_COLOR);
-            s.slotBg.setStrokeStyle(2, SLOT_BORDER);
+        this.slots.forEach(s => {
+            s.bg.setFillStyle(SLOT_COLOR).setStrokeStyle(2, SLOT_BORDER);
             s.label.setColor('#d4c5a0');
         });
     }
 
-    // ---- 通用列表渲染 ----
-    buildList(top, maxH, cx, pw, items, type, tab) {
-        const cardW = pw - 36;
+    // ============ 公告栏列表 ============
+    _buildBulletin(ctn, cx, iw) {
+        let y = 0;
+        BULLETIN_DATA.forEach(item => {
+            const ch = 66, cy2 = y + ch / 2;
 
-        // 裁剪遮罩
-        const maskGfx = this.scene.make.graphics();
-        maskGfx.fillRect(cx - pw / 2 + 10, top, pw - 20, maxH);
-        const mask = maskGfx.createGeometryMask();
-
-        const listContainer = this.scene.add.container(0, 0);
-        listContainer.setMask(mask);
-        listContainer.setScrollFactor(0);
-        listContainer.setDepth(67);
-
-        let itemY = 0;
-        items.forEach((item, i) => {
-            const cardH = type === 'bulletin' ? 72 : 68;
-            const y = itemY + cardH / 2;
-
-            const card = this.scene.add.rectangle(cx, y, cardW, cardH, 0x5c3a1e, 0.85);
-            card.setStrokeStyle(1, 0x7a5a30);
-            card.setScrollFactor(0);
-            card.setDepth(67);
+            const card = this.scene.add.rectangle(cx, cy2, iw, ch, 0x5c3a1e, 0.85).setStrokeStyle(1, 0x7a5a30);
             card.setInteractive({ useHandCursor: true });
             card.on('pointerover', () => card.setFillStyle(0x7a4e22));
             card.on('pointerout', () => card.setFillStyle(0x5c3a1e));
-            card.on('pointerdown', (pointer) => {
-                pointer.event.stopPropagation();
-                if (type === 'bulletin') {
-                    this.showBulletinDetail(item, cx, pw, tab);
-                }
-            });
+            card.on('pointerdown', (p) => { p.event.stopPropagation(); this._showDetail(item); });
+            ctn.add(card);
 
-            listContainer.add(card);
+            const bar = this.scene.add.rectangle(cx - iw / 2 + 4, cy2, 4, ch - 8,
+                Phaser.Display.Color.HexStringToColor(item.color).color);
+            ctn.add(bar);
 
-            if (type === 'bulletin') {
-                const colorBar = this.scene.add.rectangle(cx - cardW / 2 + 4, y, 4, cardH - 8,
-                    Phaser.Display.Color.HexStringToColor(item.color).color, 1);
-                colorBar.setScrollFactor(0).setDepth(68);
-                listContainer.add(colorBar);
+            // 标题（截断防溢出）
+            const t = item.title.length > 16 ? item.title.slice(0, 16) + '…' : item.title;
+            ctn.add(this.scene.add.text(cx - iw / 2 + 14, cy2 - 14, t,
+                { fontSize: '15px', fill: '#f0e6d3', fontStyle: 'bold' }));
 
-                const title = this.scene.add.text(cx - cardW / 2 + 16, y - 14, item.title, {
-                    fontSize: '15px', fill: '#f0e6d3', fontStyle: 'bold'
-                }).setScrollFactor(0).setDepth(68);
-                const meta = this.scene.add.text(cx - cardW / 2 + 16, y + 10, `${item.date} · [${item.type}]`, {
-                    fontSize: '11px', fill: '#a09080'
-                }).setScrollFactor(0).setDepth(68);
-                const arrow = this.scene.add.text(cx + cardW / 2 - 40, y + 10, '>', {
-                    fontSize: '12px', fill: '#888'
-                }).setScrollFactor(0).setDepth(68);
-                listContainer.add(title, meta, arrow);
-            }
+            ctn.add(this.scene.add.text(cx - iw / 2 + 14, cy2 + 10, `${item.date} · ${item.type}`,
+                { fontSize: '11px', fill: '#a09080' }));
 
-            itemY += cardH + 6;
+            ctn.add(this.scene.add.text(cx + iw / 2 - 25, cy2, '▶',
+                { fontSize: '14px', fill: '#888' }).setOrigin(0.5));
+
+            y += ch + 6;
         });
-
-        this.panelElements.push(listContainer);
-
-        if (itemY > maxH) {
-            let scrollY = 0;
-            const wheelHandler = (pointer, gameObjects, dx, dy) => {
-                if (this.activeTab !== type) return;
-                scrollY += dy * 0.3;
-                scrollY = Phaser.Math.Clamp(scrollY, 0, itemY - maxH + 10);
-                listContainer.y = top - scrollY;
-            };
-            this.scene.input.on('wheel', wheelHandler);
-            this._wheelHandler = wheelHandler;
-        }
+        return y;
     }
 
-    buildMarketList(top, maxH, cx, pw, tab) {
-        const cardW = pw - 36;
-        const maskGfx = this.scene.make.graphics();
-        maskGfx.fillRect(cx - pw / 2 + 10, top, pw - 20, maxH - 10);
-        const mask = maskGfx.createGeometryMask();
+    _showDetail(item) {
+        // 销毁当前面板，重建详情
+        if (this.panelContainer) { this.panelContainer.destroy(); this.panelContainer = null; }
+        if (this.wheelFn) { this.scene.input.off('wheel', this.wheelFn); this.wheelFn = null; }
 
-        const listContainer = this.scene.add.container(0, 0);
-        listContainer.setMask(mask);
-        listContainer.setScrollFactor(0);
-        listContainer.setDepth(67);
-
-        let itemY = 0;
-        MARKET_DATA.forEach(item => {
-            const cardH = 62;
-            const y = itemY + cardH / 2;
-
-            const card = this.scene.add.rectangle(cx, y, cardW, cardH, 0x5c3a1e, 0.85);
-            card.setStrokeStyle(1, 0x7a5a30);
-            card.setScrollFactor(0).setDepth(67);
-
-            const tag = this.scene.add.text(cx - cardW / 2 + 12, y - 16, `[${item.tag}]`, {
-                fontSize: '11px', fill: '#81c784'
-            }).setScrollFactor(0).setDepth(68);
-            const title = this.scene.add.text(cx - cardW / 2 + 60, y - 16, item.title.substring(0, 16), {
-                fontSize: '14px', fill: '#f0e6d3', fontStyle: 'bold'
-            }).setScrollFactor(0).setDepth(68);
-
-            const price = this.scene.add.text(cx - cardW / 2 + 12, y + 10, item.price, {
-                fontSize: '16px', fill: '#ef5350', fontStyle: 'bold'
-            }).setScrollFactor(0).setDepth(68);
-            const seller = this.scene.add.text(cx - cardW / 2 + 70, y + 12, `${item.seller} · ${item.condition}`, {
-                fontSize: '11px', fill: '#a09080'
-            }).setScrollFactor(0).setDepth(68);
-            const contact = this.scene.add.text(cx + cardW / 2 - 50, y + 8, '💬', {
-                fontSize: '18px'
-            }).setScrollFactor(0).setDepth(68).setInteractive({ useHandCursor: true });
-
-            listContainer.add(card, tag, title, price, seller, contact);
-            itemY += cardH + 6;
-        });
-
-        this.panelElements.push(listContainer);
-
-        if (itemY > maxH) {
-            let scrollY = 0;
-            const wheelHandler = (pointer, gameObjects, dx, dy) => {
-                if (this.activeTab !== 'market') return;
-                scrollY += dy * 0.3;
-                scrollY = Phaser.Math.Clamp(scrollY, 0, itemY - maxH + 10);
-                listContainer.y = top - scrollY;
-            };
-            this.scene.input.on('wheel', wheelHandler);
-            this._wheelHandler = wheelHandler;
-        }
-    }
-
-    buildFriendsList(top, maxH, cx, pw, tab) {
-        FRIENDS_DATA.forEach((friend, i) => {
-            const cardW = pw - 36;
-            const cardH = 50;
-            const y = top + 30 + i * 58;
-            const x = cx;
-
-            const card = this.scene.add.rectangle(x, y, cardW, cardH, 0x5c3a1e, 0.85);
-            card.setStrokeStyle(1, 0x7a5a30);
-            card.setScrollFactor(0).setDepth(67);
-
-            const avatar = this.scene.add.text(x - cardW / 2 + 20, y, friend.avatar, {
-                fontSize: '22px'
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(68);
-
-            const name = this.scene.add.text(x - cardW / 2 + 50, y - 9, friend.name, {
-                fontSize: '15px', fill: '#f0e6d3', fontStyle: 'bold'
-            }).setScrollFactor(0).setDepth(68);
-
-            const info = this.scene.add.text(x - cardW / 2 + 50, y + 9,
-                `● ${friend.status}  |  在 ${friend.scene}`, {
-                    fontSize: '11px', fill: friend.color
-                }).setScrollFactor(0).setDepth(68);
-
-            const chat = this.scene.add.text(x + cardW / 2 - 40, y, '💬 私聊', {
-                fontSize: '13px', fill: '#d4a017'
-            }).setOrigin(0.5).setScrollFactor(0).setDepth(68).setInteractive({ useHandCursor: true });
-
-            this.panelElements.push(card, avatar, name, info, chat);
-        });
-
-        const hint = this.scene.add.text(cx, top + maxH - 15, '好友聊天功能将在后续版本上线', {
-            fontSize: '12px', fill: '#7a6a50'
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(68);
-        this.panelElements.push(hint);
-    }
-
-    showBulletinDetail(ann, cx, pw, tab) {
-        this.panelElements.forEach(el => el.destroy());
-        this.panelElements = [];
-
+        this.panelContainer = this.scene.add.container(0, 0).setScrollFactor(0).setDepth(65);
         const W = 1024, H = 768;
-        const panelW = 460, panelH = 380;
-        const panelX = W / 2 + 20, panelY = H / 2;
+        const pw = 440, ph = 360;
+        const cx = W / 2 + 20, cy = H / 2;
 
-        const panelBg = this.scene.add.rectangle(panelX, panelY, panelW, panelH, PANEL_BG, 0.98);
-        panelBg.setStrokeStyle(3, Phaser.Display.Color.HexStringToColor(ann.color).color);
-        panelBg.setScrollFactor(0).setDepth(65);
+        this.panelContainer.add(
+            this.scene.add.rectangle(cx, cy, pw, ph, PANEL_BG, 0.98)
+                .setStrokeStyle(3, Phaser.Display.Color.HexStringToColor(item.color).color)
+        );
 
-        const titleBg = this.scene.add.rectangle(panelX, panelY - panelH / 2 + 25, panelW - 6, 45, 0x2a1a0a, 1);
-        titleBg.setScrollFactor(0).setDepth(66);
+        const tY = cy - ph / 2 + 25;
+        this.panelContainer.add(this.scene.add.rectangle(cx, tY, pw - 6, 42, 0x2a1a0a));
+        this.panelContainer.add(this.scene.add.text(cx - pw / 2 + 18, tY, item.title,
+            { fontSize: '17px', fill: '#ffcc00', fontStyle: 'bold' }).setOrigin(0, 0.5));
 
-        const title = this.scene.add.text(panelX - panelW / 2 + 20, panelY - panelH / 2 + 15, ann.title, {
-            fontSize: '18px', fill: '#ffcc00', fontStyle: 'bold'
-        }).setOrigin(0, 0.5).setScrollFactor(0).setDepth(67);
+        // 关闭按钮 → 返回列表
+        const cb = this.scene.add.text(cx + pw / 2 - 18, tY, '✕',
+            { fontSize: '18px', fill: '#f66' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+        cb.on('pointerdown', (p) => { p.event.stopPropagation(); this.open(this._tab); });
+        this.panelContainer.add(cb);
 
-        const closeBtn = this.scene.add.text(panelX + panelW / 2 - 20, panelY - panelH / 2 + 12, '✕', {
-            fontSize: '20px', fill: '#ff6666'
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(67).setInteractive({ useHandCursor: true });
-        closeBtn.on('pointerdown', (pointer) => {
-            pointer.event.stopPropagation();
-            this.panelElements.forEach(el => el.destroy());
-            this.panelElements = [];
-            this.openPanel(tab);
-        });
+        const dY = tY + 26;
+        this.panelContainer.add(this.scene.add.rectangle(cx, dY, pw - 20, 1, PANEL_BORDER));
 
-        const divider = this.scene.add.rectangle(panelX, panelY - panelH / 2 + 52, panelW - 20, 1, PANEL_BORDER);
-        divider.setScrollFactor(0).setDepth(67);
+        this.panelContainer.add(this.scene.add.text(cx - pw / 2 + 18, dY + 16,
+            `${item.date}  [${item.type}]`, { fontSize: '12px', fill: item.color }));
 
-        const meta = this.scene.add.text(panelX - panelW / 2 + 20, panelY - panelH / 2 + 70,
-            `${ann.date}  [${ann.type}]`, { fontSize: '13px', fill: ann.color }
-        ).setScrollFactor(0).setDepth(67);
+        // 正文（带自动换行，不溢出）
+        this.panelContainer.add(this.scene.add.text(cx - pw / 2 + 18, dY + 42, item.detail,
+            { fontSize: '14px', fill: '#d4c5a0', wordWrap: { width: pw - 46 }, lineSpacing: 5 }));
 
-        const content = this.scene.add.text(panelX - panelW / 2 + 20, panelY - panelH / 2 + 100, ann.content, {
-            fontSize: '14px', fill: '#d4c5a0', wordWrap: { width: panelW - 50 }, lineSpacing: 6
-        }).setScrollFactor(0).setDepth(67);
-
-        const backBtnBg = this.scene.add.rectangle(panelX, panelY + panelH / 2 - 35, 120, 32, 0x5c3a1e, 1);
-        backBtnBg.setStrokeStyle(1, PANEL_BORDER);
-        backBtnBg.setScrollFactor(0).setDepth(67).setInteractive({ useHandCursor: true });
-        const backBtn = this.scene.add.text(panelX, panelY + panelH / 2 - 35, '← 返回列表', {
-            fontSize: '14px', fill: '#f0e6d3'
-        }).setOrigin(0.5).setScrollFactor(0).setDepth(68);
-
-        backBtnBg.on('pointerover', () => backBtnBg.setFillStyle(0x7a4e22));
-        backBtnBg.on('pointerout', () => backBtnBg.setFillStyle(0x5c3a1e));
-        backBtnBg.on('pointerdown', (pointer) => {
-            pointer.event.stopPropagation();
-            this.panelElements.forEach(el => el.destroy());
-            this.panelElements = [];
-            this.openPanel(tab);
-        });
-
-        this.panelElements.push(panelBg, titleBg, title, closeBtn, divider, meta, content, backBtnBg, backBtn);
+        // 返回按钮
+        const bb = this.scene.add.rectangle(cx, cy + ph / 2 - 30, 120, 30, 0x5c3a1e)
+            .setStrokeStyle(1, PANEL_BORDER).setInteractive({ useHandCursor: true });
+        const bt = this.scene.add.text(cx, cy + ph / 2 - 30, '← 返回列表',
+            { fontSize: '14px', fill: '#f0e6d3' }).setOrigin(0.5);
+        bb.on('pointerover', () => bb.setFillStyle(0x7a4e22));
+        bb.on('pointerout', () => bb.setFillStyle(0x5c3a1e));
+        bb.on('pointerdown', (p) => { p.event.stopPropagation(); this.open(this._tab); });
+        this.panelContainer.add([bb, bt]);
     }
 
-    destroy() {
-        this.closePanel();
-        this.slotElements.forEach(s => {
-            if (s.slotBg) s.slotBg.destroy();
-            if (s.icon) s.icon.destroy();
-            if (s.label) s.label.destroy();
-            if (s.hitArea) s.hitArea.destroy();
+    // ============ 二手市场列表 ============
+    _buildMarket(ctn, cx, iw) {
+        let y = 0;
+        MARKET_DATA.forEach(item => {
+            const ch = 58, cy2 = y + ch / 2;
+            const card = this.scene.add.rectangle(cx, cy2, iw, ch, 0x5c3a1e, 0.85).setStrokeStyle(1, 0x7a5a30);
+            ctn.add(card);
+
+            ctn.add(this.scene.add.text(cx - iw / 2 + 10, cy2 - 15, `[${item.tag}]`,
+                { fontSize: '11px', fill: '#81c784' }));
+            const t = item.title.length > 12 ? item.title.slice(0, 12) + '…' : item.title;
+            ctn.add(this.scene.add.text(cx - iw / 2 + 55, cy2 - 15, t,
+                { fontSize: '14px', fill: '#f0e6d3', fontStyle: 'bold' }));
+
+            ctn.add(this.scene.add.text(cx - iw / 2 + 10, cy2 + 10, item.price,
+                { fontSize: '16px', fill: '#ef5350', fontStyle: 'bold' }));
+            ctn.add(this.scene.add.text(cx - iw / 2 + 65, cy2 + 12,
+                `${item.seller} · ${item.cond}`, { fontSize: '11px', fill: '#a09080' }));
+            ctn.add(this.scene.add.text(cx + iw / 2 - 35, cy2, '💬',
+                { fontSize: '18px' }).setOrigin(0.5).setInteractive({ useHandCursor: true }));
+
+            y += ch + 6;
         });
+        return y;
+    }
+
+    // ============ 好友列表 ============
+    _buildFriends(ctn, cx, iw, top, maxH) {
+        FRIENDS_DATA.forEach((f, i) => {
+            const ch = 48, cy2 = top + 28 + i * 56;
+
+            const card = this.scene.add.rectangle(cx, cy2, iw, ch, 0x5c3a1e, 0.85).setStrokeStyle(1, 0x7a5a30);
+            ctn.add(card);
+
+            ctn.add(this.scene.add.text(cx - iw / 2 + 22, cy2, f.avatar,
+                { fontSize: '22px' }).setOrigin(0.5));
+            ctn.add(this.scene.add.text(cx - iw / 2 + 52, cy2 - 9, f.name,
+                { fontSize: '15px', fill: '#f0e6d3', fontStyle: 'bold' }));
+            ctn.add(this.scene.add.text(cx - iw / 2 + 52, cy2 + 9,
+                `● ${f.status}  |  在${f.scene}`, { fontSize: '11px', fill: f.color }));
+            ctn.add(this.scene.add.text(cx + iw / 2 - 30, cy2, '💬 私聊',
+                { fontSize: '12px', fill: '#d4a017' }).setOrigin(0.5).setInteractive({ useHandCursor: true }));
+        });
+
+        ctn.add(this.scene.add.text(cx, top + maxH - 20, '好友聊天功能将在后续版本上线',
+            { fontSize: '12px', fill: '#7a6a50' }).setOrigin(0.5));
+    }
+
+    // ============ 销毁 ============
+    destroy() {
+        this.close();
+        this.slots.forEach(s => {
+            s.bg.destroy(); s.icon.destroy(); s.label.destroy(); s.hit.destroy();
+        });
+        this.slots = [];
         if (this.overlay) this.overlay.destroy();
-        if (this.closeIcon) this.closeIcon.destroy();
-        if (this._wheelHandler) {
-            this.scene.input.off('wheel', this._wheelHandler);
-        }
-        this.slotElements = [];
-        this.panelElements = [];
+        if (this.closeBtn) this.closeBtn.destroy();
     }
 }
