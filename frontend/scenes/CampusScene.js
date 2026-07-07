@@ -40,6 +40,7 @@ export class CampusScene extends Phaser.Scene {
     this.load.image('bg_dorm', '/sucai/zi_dorm.png');
     this.load.image('bg_computerlab', '/sucai/zi_computerlab.png');
     this.load.image('bg_research', '/sucai/zi_research.png');
+    this.load.image('player2', '/sucai/player2.png');
 }
     create(data) {
         let startX = 632, startY = 156;
@@ -103,8 +104,36 @@ export class CampusScene extends Phaser.Scene {
         this.player.body.setOffset(14, 14);
         this.physics.add.collider(this.player, this.collisionGroup);
 
+        // 玩家二（键盘方向键控制）
+        this.player2 = this.add.sprite(startX + 80, startY, 'player2');
+        this.player2.setDisplaySize(36, 36);
+        this.player2.setOrigin(0.5, 0.5);
+        this.physics.add.existing(this.player2);
+        this.player2.body.setCollideWorldBounds(true);
+        this.player2.body.setSize(8, 8);
+        this.player2.body.setOffset(14, 14);
+        this.physics.add.collider(this.player2, this.collisionGroup);
+
+        // 键盘 WASD（玩家一）
+        this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
+        this.keyA = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
+        this.keyS = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
+        this.keyD = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
+        // 方向键（玩家二）
+        this.keyUp = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+        this.keyLeft = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT);
+        this.keyDown = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
+        this.keyRight = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT);
+
         this.cameras.main.setBounds(0, 0, 1472, 1088);
         this.cameras.main.startFollow(this.player, true, 0.1, 0.1);
+
+        // 交友弹窗（初始隐藏）
+        this.socialPopup = this.add.container(0, 0);
+        this.socialPopup.setScrollFactor(0);
+        this.socialPopup.setDepth(150);
+        this.socialPopup.setVisible(false);
+        this._buildSocialPopup();
 
         // 建筑入口（enter 层）—— 只做触发区，不加碰撞体
         const enterLayer = map.getObjectLayer('enter');
@@ -227,13 +256,61 @@ export class CampusScene extends Phaser.Scene {
     }
 
     update() {
-        // 实时坐标显示
-        if (this.coordDisplay && this.player) {
-            this.coordDisplay.setText(`📍 x:${Math.round(this.player.x)}  y:${Math.round(this.player.y)}`);
+        const SPD = this.SPEED;
+        // 实时坐标显示（双人）
+        if (this.coordDisplay && this.player && this.player2) {
+            this.coordDisplay.setText(
+                `🚶P1 x:${Math.round(this.player.x)} y:${Math.round(this.player.y)}\n🚶P2 x:${Math.round(this.player2.x)} y:${Math.round(this.player2.y)}`
+            );
         }
         updateHintPos(this);
 
-        // 检测玩家与哪个入口区域重叠（精确检测）
+        // ---- 键盘移动 ----
+        if (!this.isInteracting) {
+            // 玩家一 WASD（优先键盘，否则鼠标点选）
+            let p1vx = 0, p1vy = 0;
+            if (this.keyA.isDown) p1vx = -SPD;
+            else if (this.keyD.isDown) p1vx = SPD;
+            if (this.keyW.isDown) p1vy = -SPD;
+            else if (this.keyS.isDown) p1vy = SPD;
+
+            if (p1vx !== 0 || p1vy !== 0) {
+                // 键盘控制时取消鼠标目标
+                this.moveTarget = null;
+                this.player.body.setVelocity(p1vx, p1vy);
+            } else if (this.moveTarget) {
+                const dx = this.moveTarget.x - this.player.x;
+                const dy = this.moveTarget.y - this.player.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 5) { this.player.body.setVelocity(0); this.moveTarget = null; }
+                else {
+                    const a = Math.atan2(dy, dx);
+                    this.player.body.setVelocity(Math.cos(a) * SPD, Math.sin(a) * SPD);
+                }
+            } else {
+                this.player.body.setVelocity(0);
+            }
+
+            // 玩家二 方向键
+            let p2vx = 0, p2vy = 0;
+            if (this.keyLeft.isDown) p2vx = -SPD;
+            else if (this.keyRight.isDown) p2vx = SPD;
+            if (this.keyUp.isDown) p2vy = -SPD;
+            else if (this.keyDown.isDown) p2vy = SPD;
+            this.player2.body.setVelocity(p2vx, p2vy);
+        }
+
+        // ---- 双人相遇检测 ----
+        if (this.player && this.player2) {
+            const dist = Phaser.Math.Distance.Between(this.player.x, this.player.y, this.player2.x, this.player2.y);
+            if (dist < 60 && !this.isInteracting && !this.socialPopup.visible) {
+                this._showSocialPopup();
+            } else if (dist >= 80 && this.socialPopup.visible && !this._socialLocked) {
+                this._hideSocialPopup();
+            }
+        }
+
+        // 检测进入区域（玩家一）
         let closestEnter = null;
         for (let zone of this.enterZones) {
             if (this.physics.overlap(this.player, zone.zone)) {
@@ -250,23 +327,7 @@ export class CampusScene extends Phaser.Scene {
             }
         }
 
-        // 移动
-        if (!this.isInteracting && this.moveTarget) {
-            const dx = this.moveTarget.x - this.player.x;
-            const dy = this.moveTarget.y - this.player.y;
-            const dist = Math.hypot(dx, dy);
-            if (dist < 5) {
-                this.player.body.setVelocity(0);
-                this.moveTarget = null;
-            } else {
-                const angle = Math.atan2(dy, dx);
-                this.player.body.setVelocity(Math.cos(angle) * this.SPEED, Math.sin(angle) * this.SPEED);
-            }
-        } else if (!this.isInteracting && (this.player.body.velocity.x !== 0 || this.player.body.velocity.y !== 0)) {
-            this.player.body.setVelocity(0);
-        }
-
-        // 按T打开/关闭导航面板
+        // 按T
         if (Phaser.Input.Keyboard.JustDown(this.navKey)) {
             this.toggleNavigationPanel();
         }
@@ -527,5 +588,76 @@ export class CampusScene extends Phaser.Scene {
     getSceneLabel(sceneKey) {
         const map = { GymScene: '体育馆', McDonaldScene: '麦当劳', OfficeScene: '院长办公室', ServiceHallScene: '事务大厅', LibraryScene: '图书馆', DormScene: '宿舍', ComputerLabScene: '机房', ResearchScene: '科研楼', TeacherOfficeScene: '教师办公室' };
         return map[sceneKey] || sceneKey;
+    }
+
+    // ============ 交友弹窗 ============
+    _buildSocialPopup() {
+        const W = 1024;
+        // 背景
+        const bg = this.add.rectangle(W / 2, 384, 340, 280, 0x1a1a2e, 0.95);
+        bg.setStrokeStyle(2, 0xffb74d);
+        this.socialPopup.add(bg);
+
+        const title = this.add.text(W / 2, 270, '👥 遇见了一位同学！', {
+            fontSize: '20px', fill: '#ffcc00', fontStyle: 'bold'
+        }).setOrigin(0.5);
+        this.socialPopup.add(title);
+
+        const divider = this.add.rectangle(W / 2, 300, 280, 1, 0x444466);
+        this.socialPopup.add(divider);
+
+        // 操作按钮
+        const actions = [
+            { label: '🤝 加好友', y: 335 },
+            { label: '👋 打招呼', y: 385 },
+            { label: '💬 私聊', y: 435 },
+        ];
+
+        actions.forEach(a => {
+            const btnBg = this.add.rectangle(W / 2, a.y, 220, 36, 0x333366, 1);
+            btnBg.setStrokeStyle(1, 0x555588);
+            btnBg.setInteractive({ useHandCursor: true });
+            btnBg.on('pointerover', () => btnBg.setFillStyle(0x444488));
+            btnBg.on('pointerout', () => btnBg.setFillStyle(0x333366));
+            btnBg.on('pointerdown', (p) => {
+                p.event.stopPropagation();
+                showHint(this, `${a.label} — 功能将在后续版本上线`, '#ffcc00');
+            });
+            this.socialPopup.add(btnBg);
+
+            const label = this.add.text(W / 2, a.y, a.label, {
+                fontSize: '16px', fill: '#ffffff'
+            }).setOrigin(0.5);
+            this.socialPopup.add(label);
+        });
+
+        // 关闭按钮
+        const closeBg = this.add.rectangle(W / 2, 485, 120, 28, 0x662222, 1);
+        closeBg.setInteractive({ useHandCursor: true });
+        closeBg.on('pointerover', () => closeBg.setFillStyle(0x883333));
+        closeBg.on('pointerout', () => closeBg.setFillStyle(0x662222));
+        closeBg.on('pointerdown', (p) => {
+            p.event.stopPropagation();
+            this._socialLocked = true;
+            this._hideSocialPopup();
+            this.time.delayedCall(2000, () => { this._socialLocked = false; });
+        });
+        this.socialPopup.add(closeBg);
+
+        const closeTxt = this.add.text(W / 2, 485, '✕ 走开', {
+            fontSize: '14px', fill: '#ff9999'
+        }).setOrigin(0.5);
+        this.socialPopup.add(closeTxt);
+        this._socialLocked = false;
+    }
+
+    _showSocialPopup() {
+        this.socialPopup.setVisible(true);
+        this.isInteracting = true;
+    }
+
+    _hideSocialPopup() {
+        this.socialPopup.setVisible(false);
+        this.isInteracting = false;
     }
 }
