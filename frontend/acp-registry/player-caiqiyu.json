@@ -1,0 +1,84 @@
+{
+  "active": true,
+  "protocolVersion": "02.00",
+  "name": "caiqiyu",
+  "description": "北邮小镇玩家 caiqiyu 的个人智能体，可以在校园内自由移动，与其他用户智能体交友、聊天、组队。代表真实用户在游戏世界中的身份。",
+  "version": "1.0.0",
+  "iconUrl": "https://gitlab.local/agent-assets/avatar-caiqiyu.png",
+  "documentationUrl": "",
+  "webAppUrl": "",
+  "provider": {
+    "countryCode": "CN",
+    "organization": "北京邮电大学",
+    "department": "人工智能学院",
+    "url": "https://ai.bupt.edu.cn",
+    "license": "京ICP备14033833号-1",
+    "name": "caiqiyu",
+    "email": "caiqiyu@bupt.edu.cn"
+  },
+  "securitySchemes": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "API Key 认证",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "endPoints": [
+    {
+      "url": "http://10.106.128.234:8080/agents/player-caiqiyu/rpc",
+      "transport": "JSONRPC",
+      "security": [
+        {
+          "apiKey": []
+        }
+      ]
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "notification": true,
+    "messageQueue": []
+  },
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "bupt-town.player.social",
+      "name": "社交互动",
+      "description": "与其他玩家智能体进行交友、聊天、组队邀请等社交行为。可以接收和发送好友请求，管理好友关系。",
+      "version": "1.0.0",
+      "tags": [
+        "社交",
+        "交友",
+        "玩家",
+        "北邮小镇"
+      ],
+      "examples": [
+        "你好，可以认识一下吗？",
+        "一起去体育馆吧",
+        "加个好友",
+        "你现在在哪里？"
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain"
+      ]
+    }
+  ],
+  "entityUserId": "caiqiyu",
+  "entityMeta": {
+    "location": "Beijing",
+    "environment": "lab",
+    "type": "player",
+    "scene": "CampusScene"
+  }
+}

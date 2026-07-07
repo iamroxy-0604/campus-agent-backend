@@ -1,0 +1,87 @@
+{
+  "active": true,
+  "protocolVersion": "02.00",
+  "name": "北邮小镇麦当劳经理",
+  "description": "北邮小镇麦当劳餐厅经理智能体，负责回答麦当劳相关的问题，包括套餐推荐、优惠活动、联名限定餐品上线、营业时间、价格查询等。只服务北邮小镇麦当劳子场景内的顾客，不涉及其他餐厅或校外门店。",
+  "version": "1.0.0",
+  "iconUrl": "https://gitlab.local/agent-assets/mcd-manager.png",
+  "documentationUrl": "https://gitlab.local/docs/mcd-manager",
+  "webAppUrl": "https://gitlab.local/demo/mcd-manager",
+  "provider": {
+    "countryCode": "CN",
+    "organization": "北京邮电大学",
+    "department": "人工智能学院",
+    "url": "https://ai.bupt.edu.cn",
+    "license": "京ICP备14033833号-1",
+    "name": "caiqiyu",
+    "email": "caiqiyu@bupt.edu.cn"
+  },
+  "securitySchemes": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "API Key 认证",
+      "in": "header",
+      "name": "X-API-Key"
+    }
+  },
+  "endPoints": [
+    {
+      "url": "http://10.106.128.234:8080/agents/mcd/rpc",
+      "transport": "JSONRPC",
+      "security": [
+        {
+          "apiKey": []
+        }
+      ]
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "notification": false,
+    "messageQueue": []
+  },
+  "defaultInputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "defaultOutputModes": [
+    "text/plain",
+    "application/json"
+  ],
+  "skills": [
+    {
+      "id": "bupt-town.mcd.qa",
+      "name": "麦当劳问答",
+      "description": "回答北邮麦当劳餐厅的套餐信息、优惠活动、联名限定餐品、营业时间、价格等问题。无法处理校外门店或其他餐厅的咨询。",
+      "version": "1.0.0",
+      "tags": [
+        "餐饮",
+        "麦当劳",
+        "套餐",
+        "优惠",
+        "北邮小镇"
+      ],
+      "examples": [
+        "今天有什么优惠套餐？",
+        "最近有联名活动吗？",
+        "一个巨无霸多少钱？",
+        "营业时间到几点？",
+        "推荐一个适合女生的套餐"
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain",
+        "application/json"
+      ]
+    }
+  ],
+  "entityUserId": "mcd-manager",
+  "entityMeta": {
+    "location": "Beijing",
+    "environment": "lab",
+    "scene": "McDonaldScene",
+    "type": "npc"
+  }
+}
