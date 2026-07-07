@@ -219,9 +219,19 @@ export class CampusScene extends Phaser.Scene {
         });
         navHint.setScrollFactor(0);
         navHint.setDepth(100);
+
+        // 坐标显示器（调试用，右下角）
+        this.coordDisplay = this.add.text(980, 740, '', {
+            fontSize: '14px', fill: '#00ff00', fontFamily: 'monospace',
+            backgroundColor: '#000000aa', padding: { x: 8, y: 4 }
+        }).setScrollFactor(0).setDepth(200);
     }
 
     update() {
+        // 实时坐标显示
+        if (this.coordDisplay && this.player) {
+            this.coordDisplay.setText(`📍 x:${Math.round(this.player.x)}  y:${Math.round(this.player.y)}`);
+        }
         updateHintPos(this);
 
         // 检测玩家与哪个入口区域重叠（精确检测）
