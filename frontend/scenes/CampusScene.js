@@ -155,11 +155,11 @@ export class CampusScene extends Phaser.Scene {
 
         // ---- 新建筑入口区域（按命名匹配校园地图位置）----
         const newBuildings = [
-            { id: 'service_hall', name: '事务大厅', x: 230, y: 480, scene: 'ServiceHallScene' },
-            { id: 'library', name: '图书馆', x: 370, y: 370, scene: 'LibraryScene' },
-            { id: 'dorm', name: '宿舍', x: 650, y: 720, scene: 'DormScene' },
-            { id: 'computer_lab', name: '机房', x: 1150, y: 370, scene: 'ComputerLabScene' },
-            { id: 'research', name: '科研楼', x: 430, y: 800, scene: 'ResearchScene' },
+            { id: 'library', name: '图书馆', x: 900, y: 531, scene: 'LibraryScene' },
+            { id: 'computer_lab', name: '机房', x: 1050, y: 598, scene: 'ComputerLabScene' },
+            { id: 'dorm', name: '宿舍', x: 516, y: 423, scene: 'DormScene' },
+            { id: 'service_hall', name: '事务大厅', x: 923, y: 633, scene: 'ServiceHallScene' },
+            { id: 'research', name: '科研楼', x: 1138, y: 363, scene: 'ResearchScene' },
         ];
 
         newBuildings.forEach(b => {
