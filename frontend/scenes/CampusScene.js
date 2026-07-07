@@ -220,10 +220,11 @@ export class CampusScene extends Phaser.Scene {
         navHint.setScrollFactor(0);
         navHint.setDepth(100);
 
-        // 坐标显示器（调试用，右下角）
-        this.coordDisplay = this.add.text(980, 740, '', {
-            fontSize: '14px', fill: '#00ff00', fontFamily: 'monospace',
-            backgroundColor: '#000000aa', padding: { x: 8, y: 4 }
+        // 坐标显示器（调试用，左上角）
+        this.coordDisplay = this.add.text(10, 10, '', {
+            fontSize: '16px', fill: '#00ff00', fontFamily: 'monospace',
+            backgroundColor: '#000000cc', padding: { x: 10, y: 6 },
+            stroke: '#000000', strokeThickness: 2
         }).setScrollFactor(0).setDepth(200);
     }
 
