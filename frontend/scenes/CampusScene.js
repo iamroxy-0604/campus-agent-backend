@@ -536,7 +536,7 @@ export class CampusScene extends Phaser.Scene {
         const div = document.createElement('div');
         div.style.position = 'absolute';
         div.style.left = '50%';
-        div.style.top = '32%';
+        div.style.top = '26%';
         div.style.transform = 'translate(-50%, -50%)';
         div.style.zIndex = '1000';
         div.style.display = 'flex';
