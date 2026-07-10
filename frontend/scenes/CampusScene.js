@@ -43,14 +43,12 @@ export class CampusScene extends Phaser.Scene {
     this.load.image('player2', '/sucai/player2.png');
 }
     create(data) {
-        // 每次进入 CampusScene 重置状态，防止子场景返回后残留
+        // 每次进入场景重置关键状态
         this.enterZones = [];
         this.moveTarget = null;
         this.currentEnterZone = null;
         this.isInteracting = false;
         this.navOpen = false;
-        this.socialElements = [];
-        this._socialLocked = false;
 
         let startX = 632, startY = 156;
         this.physics.world.setBounds(0, 0, 1472, 1088);
