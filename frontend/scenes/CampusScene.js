@@ -412,7 +412,7 @@ export class CampusScene extends Phaser.Scene {
             fontSize: '24px', fill: '#ffcc00', fontStyle: 'bold'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(21);
 
-        const subTitle = this.add.text(x, y - h / 2 + 65, '也可直接输入想去的地方：', {
+        const subTitle = this.add.text(x, y - h / 2 + 65, '滚轮滑动选择 / 直接输入：', {
             fontSize: '14px', fill: '#aaaaaa'
         }).setOrigin(0.5).setScrollFactor(0).setDepth(21);
 
@@ -428,15 +428,31 @@ export class CampusScene extends Phaser.Scene {
             { label: '教师办公室', scene: 'TeacherOfficeScene' },
         ];
 
-        const buttons = [];
+        // 可滚动列表区域
+        const listTop = y - h / 2 + 90;
+        const listH = 240;
+        const itemH = 38;
+        const itemGap = 6;
+        const totalH = destinations.length * (itemH + itemGap);
+
+        // 裁剪遮罩
+        const maskGfx = this.make.graphics();
+        maskGfx.fillRect(x - w / 2 + 20, listTop, w - 40, listH);
+        const mask = maskGfx.createGeometryMask();
+
+        const listCtn = this.add.container(0, 0);
+        listCtn.setScrollFactor(0);
+        listCtn.setDepth(21);
+        listCtn.setMask(mask);
+
         destinations.forEach((dest, i) => {
-            const by = y - 10 + i * 55;
-            const btnBg = this.add.rectangle(x, by, 280, 45, 0x444444, 1)
+            const by = i * (itemH + itemGap) + itemH / 2;
+            const btnBg = this.add.rectangle(x, by, 280, itemH, 0x444444, 1)
                 .setInteractive({ useHandCursor: true })
                 .setScrollFactor(0)
                 .setDepth(21);
             const btnText = this.add.text(x, by, dest.label, {
-                fontSize: '20px', fill: '#fff'
+                fontSize: '17px', fill: '#fff'
             }).setOrigin(0.5).setScrollFactor(0).setDepth(22);
 
             btnBg.on('pointerover', () => btnBg.setFillStyle(0x666666));
@@ -447,10 +463,23 @@ export class CampusScene extends Phaser.Scene {
                 this.scene.start(dest.scene);
             });
 
-            buttons.push(btnBg, btnText);
+            listCtn.add([btnBg, btnText]);
         });
 
-        const closeY = y + h / 2 - 40;
+        panel.add(listCtn);
+
+        // 滚轮滚动
+        let scrollY = 0;
+        const wheelHandler = (pointer, go, dx, dy) => {
+            if (!this.navOpen) return;
+            scrollY += dy * 0.3;
+            scrollY = Phaser.Math.Clamp(scrollY, 0, Math.max(0, totalH - listH));
+            listCtn.y = listTop - scrollY;
+        };
+        this.input.on('wheel', wheelHandler);
+        this._navWheelHandler = wheelHandler;
+
+        const closeY = y + h / 2 - 30;
         const closeBg = this.add.rectangle(x, closeY, 120, 35, 0x880000, 1)
             .setInteractive({ useHandCursor: true })
             .setScrollFactor(0)
@@ -462,7 +491,7 @@ export class CampusScene extends Phaser.Scene {
         closeBg.on('pointerout', () => closeBg.setFillStyle(0x880000));
         closeBg.on('pointerdown', () => this.closeNavigationPanel());
 
-        panel.add([bg, title, subTitle, ...buttons, closeBg, closeText]);
+        panel.add([bg, title, subTitle, closeBg, closeText]);
 
         this.navOverlay = overlay;
         this.navPanel = panel;
@@ -492,6 +521,10 @@ export class CampusScene extends Phaser.Scene {
         this.navPanel.setVisible(false);
         this.navOverlay.setVisible(false);
         this.removeNavInputBox();
+        if (this._navWheelHandler) {
+            this.input.off('wheel', this._navWheelHandler);
+            this._navWheelHandler = null;
+        }
     }
 
     // scenes/CampusScene.js - 只显示修改的部分（createNavInputBox 方法）
